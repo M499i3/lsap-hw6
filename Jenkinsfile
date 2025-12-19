@@ -43,3 +43,4 @@ curl -sS -H "Content-Type: application/json" -X POST -d "$payload" "$WEBHOOK" >/
   }
 }
 
+}
