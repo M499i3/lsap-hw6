@@ -24,17 +24,21 @@ pipeline {
     }
   }
 
-  post {
-    failure {
-      withCredentials([string(credentialsId: 'CHAT_WEBHOOK_URL', variable: 'WEBHOOK')]) {
-        sh '''
-          payload=$(cat <<EOF
-{"content":"**CI/CD Build Failed**\\nName: ${YOUR_NAME}\\nStudent ID: ${STUDENT_ID}\\nJob: ${JOB_NAME}\\nBuild: ${BUILD_NUMBER}\\nRepo: ${GIT_URL}\\nBranch: ${BRANCH_NAME}\\nStatus: ${currentBuild.currentResult}"}
-EOF
+post {
+  failure {
+    withCredentials([string(credentialsId: 'CHAT_WEBHOOK_URL', variable: 'WEBHOOK')]) {
+      sh(label: 'Notify Discord', script: """#!/usr/bin/env bash
+set -euo pipefail
+
+payload=$(cat <<'JSON'
+{
+  "content": "❌ CI Build Failed\\nName: 潘芊寧\\nStudent ID: B12705005\\nJob: ${JOB_NAME}\\nBuild: ${BUILD_NUMBER}\\nRepo: ${GIT_URL}\\nBranch: ${BRANCH_NAME}\\nStatus: ${currentBuild.currentResult}"
+}
+JSON
 )
-          curl -sS -H "Content-Type: application/json" -X POST -d "$payload" "$WEBHOOK" >/dev/null
-        '''
-      }
+
+curl -sS -H "Content-Type: application/json" -X POST -d "$payload" "$WEBHOOK" >/dev/null
+""")
     }
   }
 }
